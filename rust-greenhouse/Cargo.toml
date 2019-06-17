@@ -1,0 +1,7 @@
+[package]
+name = "rust-greenhouse"
+version = "0.1.0"
+authors = ["Sascha Koch <koch@smartsquare.de>"]
+edition = "2018"
+
+[dependencies]
