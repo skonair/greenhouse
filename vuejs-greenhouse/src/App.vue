@@ -2,8 +2,8 @@
   <v-app>
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+        <span><v-icon class="light-green">home</v-icon></span>
+        <span class="font-weight-light">My Greenhouse</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
@@ -16,18 +16,18 @@
     </v-toolbar>
 
     <v-content>
-      <HelloWorld/>
+      <Greenhouse />
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
+  import Greenhouse from './components/Greenhouse'
 
-export default {
+  export default {
   name: 'App',
   components: {
-    HelloWorld
+    Greenhouse
   },
   data () {
     return {
