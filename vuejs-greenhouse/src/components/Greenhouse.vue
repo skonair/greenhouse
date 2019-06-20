@@ -12,7 +12,9 @@
                     <v-card-title primary-title class="px-0">
 
 
+<!--
                         <ThermometerIcon class="icon" width="64px" height="64px" style="fill: #e57373"/>
+                        -->
                         <v-icon
                                 color="red lighten-2"
                                 class="mr-5"
@@ -81,7 +83,7 @@
 </template>
 
 <script>
-    import ThermometerIcon from '../assets/thermometer-lines.vue';
+    // import ThermometerIcon from '../assets/thermometer-lines.vue';
 
     export default {
         data: () => ({
@@ -128,7 +130,6 @@
             ]
         }),
         components: {
-            ThermometerIcon
         }
 
     }
