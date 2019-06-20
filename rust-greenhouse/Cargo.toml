@@ -5,3 +5,5 @@ authors = ["Sascha Koch <koch@smartsquare.de>"]
 edition = "2018"
 
 [dependencies]
+rocket = "0.4.1"
+rocket_codegen = "0.4.1"
