@@ -83,6 +83,7 @@
 </template>
 
 <script>
+    import axios from 'axios';
     // import ThermometerIcon from '../assets/thermometer-lines.vue';
 
     export default {
@@ -94,41 +95,14 @@
             lineCap: 'round',
             labelSize: 0.01,
             labels: ['4pm', '8pm', '12am', '4am', '8am', '12pm'],
-            sensors: [
-                {
-                    sensor: 'Top',
-                    type: 'Temperature',
-                    icon: 'home',
-                    data: [24.1, 24.5, 24.7, 24.8, 25.1, 25.5],
-                    currentValue: 25.5,
-                    unit: '°C'
-                },
-                {
-                    sensor: 'Middle',
-                    type: 'Temperature',
-                    icon: 'home',
-                    data: [20.1, 21.3, 22.1, 22.3, 23.2, 23.4],
-                    currentValue: 23.4,
-                    unit: '°C'
-                },
-                {
-                    sensor: 'Bottom',
-                    type: 'Temperature',
-                    icon: 'home',
-                    data: [16, 19, 21.2, 20.2, 19.2, 18.7],
-                    currentValue: 18.7,
-                    unit: '°C'
-                },
-                {
-                    sensor: 'Hum Layer 1',
-                    type: 'Humidity',
-                    icon: 'local_bar',
-                    data: [16, 19, 21.2, 20.2, 19.2, 18.7],
-                    currentValue: 18.7,
-                    unit: '%'
-                }
-            ]
+            sensors: []
         }),
+          mounted () {
+            axios
+              .get('http://pinode01:8000/greenhouse/sensors')
+              .then(response => (this.sensors = response))
+              .catch(error => console.log(error))
+          },
         components: {
         }
 
