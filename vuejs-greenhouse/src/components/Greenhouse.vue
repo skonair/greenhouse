@@ -99,8 +99,8 @@
         }),
           mounted () {
             axios
-              .get('http://pinode01:8000/greenhouse/sensors')
-              .then(response => (this.sensors = response))
+              .get('./api/greenhouse/sensors')
+              .then(response => (this.sensors = response.data))
               .catch(error => console.log(error))
           },
         components: {
