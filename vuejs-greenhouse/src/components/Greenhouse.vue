@@ -4,7 +4,7 @@
 
         <v-layout row wrap>
 
-            <v-flex xs6 v-for="(sensor, i) in sensors" :key="i">
+            <v-flex xs6 v-for="sensor in sensors" :key="sensor.sensor">
 
                 <v-card class="mx-auto"
                         color="grey lighten-4">
@@ -28,7 +28,7 @@
 
                         <v-layout column align-start>
                             <div class="caption grey--text text-uppercase">
-                                {{ sensor.type }}
+                                {{ sensor.sensortype }}
                             </div>
                             <div>
                                 <span class="display-2 font-weight-black"
@@ -102,9 +102,7 @@
               .get('./api/greenhouse/sensors')
               .then(response => (this.sensors = response.data))
               .catch(error => console.log(error))
-          },
-        components: {
-        }
+          }
 
     }
 </script>
