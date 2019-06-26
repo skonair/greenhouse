@@ -13,44 +13,55 @@
   Left Pin (2.7 - 5.5V) -> 5v on the Arduino
   Middle Pin (Voltage out) -> PIN Analog 0 on the Arduino
   Right Pin (GND) -> GND on the Arduino
+
+  Humidity Sensor Pin Mapping:
+  ...
 */
 
 #include <SPI.h>
-#include <RF24.h>
-#include <BTLE.h>
+#include "RF24.h"
 
-#define TMP36PIN 0                                                           // what digital pin we're connected to
+#define TMP36PIN 0
+#define HUMIDPIN 1
 
 RF24 radio(9, 10); // CE, CSN
-BTLE btle(&radio);
+
+// addresses for the reading and writing pipes
+byte addresses[][6] = {"1Node","2Node"};
+
+struct message {
+  float t1,
+  float h1,
+  unsigned long time
+};
+typedef struct message Message;
 
 void setup() {
   Serial.begin(9600);
-  delay(1000);
-  Serial.print("BLE and TMP36 Starting... ");
-  Serial.println("Send Temperature Data over BTLE");
-  btle.begin("Temp01");    // 8 chars max
-  Serial.println("Successfully Started");
+  delay(500);
+  Serial.print("RF24 and TMP36 starting... ");
+
+  radio.begin();
+  radio.setPALevel(RF24_PA_LOW);  // default is RF24_PA_MAX
+  radio.openWritingPipe(addresses[0]);
+  radio.openReadingPipe(1,addresses[1]);
 }
 
 void loop() {                                              
-  float temp = readTemperature();   //read temperature data
-  if (isnan(temp)) {                                                // Check if any reads failed and exit early (to try again).
-    Serial.println(F("Failed to read from TMP36 sensor!"));
-    return;
-  }
-  
-  nrf_service_data buf;
-  buf.service_uuid = NRF_TEMPERATURE_SERVICE_UUID;
-  buf.value = BTLE::to_nRF_Float(temp);
+  float temperature = readTemperature();
+  float humidity = readHumidity();
 
-  if (!btle.advertise(0x16, &buf, sizeof(buf))) {
-    Serial.println("BTLE advertisement failed..!");
+  Message msg;
+  msg.t1 = temperature;
+  msg.h1 = humidity;
+  msg.time = micros();
+
+  Serial.println(F("Now sending"));
+  if (!radio.write( &msg, sizeof(msg) )){
+    Serial.println(F("Sending failed"));
   }
-  
-  btle.hopChannel(); 
-  delay(10);
-  Serial.print(".");
+
+  delay(5000);
 }
 
 float readTemperature() {
@@ -68,4 +79,12 @@ float readTemperature() {
   return temperatureC;  
 }
 
+float readHumidity() {
+      //getting the voltage reading from the humidity sensor
+      int reading = analogRead(HUMIDPIN);
 
+      // get a percentage (dry = 0%, wet = 100%)
+      float humidity = (1024 - reading) / 1024.0;
+
+      return humidity;
+}
