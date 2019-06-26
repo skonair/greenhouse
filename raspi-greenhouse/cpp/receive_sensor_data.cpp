@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <stdio.h>
 #include <RF24/RF24.h>
 
 using namespace std;
@@ -19,6 +20,19 @@ struct message {
 typedef struct message Message;
 
 
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    return buf;
+}
+
 int main(int argc, char** argv) {
   radio.begin();
   radio.setAutoAck(false);
@@ -30,7 +44,7 @@ int main(int argc, char** argv) {
 
   radio.startListening();
 
-  radio.printDetails();
+  //radio.printDetails();
 
   while (1) {
     // if there is data ready
@@ -41,9 +55,10 @@ int main(int argc, char** argv) {
         radio.read(&msg, sizeof(msg));
       }
 
-      printf("Got payload(t1: %.2f, h1: %.2f) %lu...\n", msg.t1, msg.h1, msg.time);
+      string sdate = currentDateTime();
+      printf("%s t1 %.2f h1 %.2f\n", sdate.c_str(), msg.t1, msg.h1);
 
-      delay(50);
+      delay(500);
     }
   }
 
