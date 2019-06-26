@@ -7,20 +7,21 @@
 
 using namespace std;
 
-RF24 radio(RPI_V2_GPIO_P1_22, BCM2835_SPI_CS0);
+RF24 radio(RPI_V2_GPIO_P1_22, RPI_V2_GPIO_P1_24, BCM2835_SPI_SPEED_8MHZ);
 
 const uint8_t addresses[][6] = {"1Node","2Node"};
 
 struct message {
-  float t1,
-  float h1,
-  unsigned long time
+  float t1;
+  float h1;
+  unsigned long time;
 };
 typedef struct message Message;
 
 
 int main(int argc, char** argv) {
   radio.begin();
+  radio.setAutoAck(false);
   radio.setRetries(15,15);
   radio.printDetails();
 
@@ -38,9 +39,9 @@ int main(int argc, char** argv) {
         radio.read(&msg, sizeof(msg));
       }
 
-      printf("Got payload(t1: %f, h1: %f) %lu...\n", msg.t1, msg.h1, msg.time);
+      printf("Got payload(t1: %.2f, h1: %.2f) %lu...\n", msg.t1, msg.h1, msg.time);
 
-      delay(925);
+      delay(50);
     }
   }
 
