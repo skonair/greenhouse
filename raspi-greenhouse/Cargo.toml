@@ -1,0 +1,8 @@
+[package]
+name = "rust-sensor"
+version = "0.1.0"
+authors = ["Sascha Koch <sascha.koch@web.de>"]
+edition = "2018"
+
+[dependencies]
+nrf24l01 = "0.2.0"

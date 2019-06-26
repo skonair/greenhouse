@@ -9,7 +9,7 @@ fn main() {
     let config = RXConfig {
         channel: 108,
         pa_level: PALevel::Low,
-        pipe0_address: *b"abcde",
+        pipe0_address: *b"1Node",
         ..Default::default()
     };
     let mut device = NRF24L01::new(25, 0).unwrap();
