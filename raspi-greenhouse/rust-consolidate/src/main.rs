@@ -25,6 +25,8 @@ fn main() {
 
   let f = File::open("./data/test.txt").unwrap();
   let file = BufReader::new(&f);
+  let mut last_chunk = 0;
+  let mut hash_map = HashMap::new();
   for (num, line) in file.lines().enumerate() {
     let l = line.unwrap();
 
@@ -47,17 +49,18 @@ fn main() {
     writeln!(writer, "Duration: {:?}", duration);
     writeln!(writer, "As whole minutes: {:?}", duration.num_minutes());
 
-    let chunkNo = duration.num_minutes() / delta;
-    writeln!(writer, "chunkNo is {}", chunkNo);
+    let chunk_no = duration.num_minutes() / delta;
+    writeln!(writer, "chunk_no is {}", chunk_no);
 
-    if (chunkNo > max_chunks) {
-      // skip because too old
-    } else {
-      // add to hashmap 
+    if (chunk_no > last_chunk) {
+      // write out hashmap
+
+      hash_map.clear();
     }
 
     for elem in iter {
       writeln!(writer, "Key {}, Value {}", elem[0], elem[1]);
+      hash_map.insert(elem[0], elem[1]);
     }
 
   }       
