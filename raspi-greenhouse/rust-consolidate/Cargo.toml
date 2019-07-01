@@ -1,0 +1,8 @@
+[package]
+name = "rust-consolidate"
+version = "0.1.0"
+authors = ["Sascha Koch <sascha.koch@web.de>"]
+edition = "2018"
+
+[dependencies]
+chrono = "0.4.7"
