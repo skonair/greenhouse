@@ -42,9 +42,9 @@ fn get_data(sensor: &str) -> Vec<f32> {
     let now = Utc::now();
     println!("Now is {:?}", now);
 
-    let duration = 1440;
-    let delta = 5;
-    let max_chunks = 288;
+    let duration = 60; // 1440;
+    let delta = 1; // 5;
+    let max_chunks = 60; // 288;
 
     let filename = format!("./data/test_{}.txt", sensor);
     let f = File::open(filename).unwrap();

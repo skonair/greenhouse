@@ -32,7 +32,7 @@
                             </div>
                             <div>
                                 <span class="display-2 font-weight-black"
-                                      v-text="sensor.currentValue || '—'">
+                                      v-text="sensor.current_value || '—'">
                                 </span>
                                 <strong>{{ sensor.unit }}</strong>
                             </div>
