@@ -37,14 +37,14 @@ int main(int argc, char** argv) {
   radio.begin();
   radio.setAutoAck(false);
   radio.setRetries(15,15);
-  radio.setPALevel(RF24_PA_LOW); // default is RF24_PA_MAX
+  radio.setPALevel(RF24_PA_HIGH); // default is RF24_PA_MAX
 
   radio.openWritingPipe(addresses[1]);
   radio.openReadingPipe(1,addresses[0]);
 
   radio.startListening();
 
-  //radio.printDetails();
+  radio.printDetails();
 
   while (1) {
     // if there is data ready
