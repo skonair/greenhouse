@@ -42,11 +42,9 @@ struct message {
 typedef struct message Message;
 
 void setup() {
-  if (Serial.available()) {
-    Serial.begin(9600);
-    delay(500);
-    Serial.print("RF24 and TMP36 starting... ");
-  }
+  Serial.begin(9600);
+  delay(500);
+  Serial.print("RF24 and TMP36 starting... ");
 
   printf_begin();
 
@@ -54,6 +52,7 @@ void setup() {
   radio.setPALevel(RF24_PA_LOW);  // default is RF24_PA_MAX
   radio.openWritingPipe(addresses[0]);
   radio.openReadingPipe(1,addresses[1]);
+  radio.setAutoAck(false);
 
   radio.printDetails();
 }
@@ -67,35 +66,17 @@ void loop() {
   msg.h1 = humidity;
   msg.time = micros();
 
-  print("msg.t1: ");
-  print(msg.t1);
-  print(" msg.h1: ");
-  print(msg.h1);
-  println(" ... now sending");
+  Serial.print("msg.t1: ");
+  Serial.print(msg.t1);
+  Serial.print(" msg.h1: ");
+  Serial.print(msg.h1);
+  Serial.println(" ... now sending");
   
   if (!radio.write( &msg, sizeof(msg) )){
-    println("Sending failed");
+    Serial.println("Sending failed");
   }
 
   delay(1000);
-}
-
-void print(const char* s) {
-  if (Serial.available()) {
-    Serial.print(s);
-  }
-}
-
-void println(const char* s) {
-  if (Serial.available()) {
-    Serial.println(s);
-  }
-}
-
-void print(float s) {
-  if (Serial.available()) {
-    Serial.print(s);
-  }
 }
 
 float readTemperature() {
