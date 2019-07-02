@@ -25,10 +25,11 @@ const std::string currentDateTime() {
     time_t     now = time(0);
     struct tm  tstruct;
     char       buf[80];
-    tstruct = *localtime(&now);
+    //tstruct = *localtime(&now);
+    tstruct = *gmtime(&now);
     // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
     // for more information about date/time format
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
 
     return buf;
 }
@@ -44,7 +45,7 @@ int main(int argc, char** argv) {
 
   radio.startListening();
 
-  radio.printDetails();
+//  radio.printDetails();
 
   while (1) {
     // if there is data ready
