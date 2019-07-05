@@ -19,24 +19,52 @@
   VCC -> 5v on the Arduino
   D0 -> not connected
   A0 -> PIN Analog 1 on the Arduino
+
+  
   ...
 */
 
+#include <Wire.h>
 #include <SPI.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 #include "RF24.h"
 #include "printf.h"
 
+#define BME_SCK 13
+#define BME_MISO 12
+#define BME_MOSI 11
+#define BME_CS 10
+
+#define SEALEVELPRESSURE_HPA (1013.25)
+
+Adafruit_BME280 bme; // I2C
+
 #define TMP36PIN 0
 #define HUMIDPIN 1
+#define BRIGHTPIN 2
 
 RF24 radio(9, 10); // CE, CSN
 
 // addresses for the reading and writing pipes
 byte addresses[][6] = {"1Node","2Node"};
 
+struct bmedata {
+  float temperature;
+  float pressure;
+  float altitude;
+  float humidity;
+};
+typedef struct bmedata BmeData;
+
 struct message {
-  float t1;
-  float h1;
+  float temperature;
+  float humidity;
+  float brightness;
+  float bme_temperature;
+  float bme_pressure;
+  float bme_altitude;
+  float bme_humidity;
   unsigned long time;
 };
 typedef struct message Message;
@@ -47,6 +75,19 @@ void setup() {
   Serial.print("RF24 and TMP36 starting... ");
 
   printf_begin();
+
+    // default settings
+    // (you can also pass in a Wire library object like &Wire2)
+    unsigned status = bme.begin();  
+    if (!status) {
+        Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+        Serial.print("SensorID was: 0x"); Serial.println(bme.sensorID(),16);
+        Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+        Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+        Serial.print("        ID of 0x60 represents a BME 280.\n");
+        Serial.print("        ID of 0x61 represents a BME 680.\n");
+        while (1);
+    }
 
   radio.begin();
   radio.setPALevel(RF24_PA_LOW);  // default is RF24_PA_MAX
@@ -60,16 +101,34 @@ void setup() {
 void loop() {
   float temperature = readTemperature();
   float humidity = readHumidity();
+  float brightness = readBrightness();
+
+  BmeData bmedata = readBmeData();
 
   Message msg;
-  msg.t1 = temperature;
-  msg.h1 = humidity;
+  msg.temperature = temperature;
+  msg.humidity = humidity;
+  msg.brightness = brightness;
+  msg.bme_temperature = bmedata.temperature;
+  msg.bme_pressure = bmedata.pressure;
+  msg.bme_altitude = bmedata.altitude;
+  msg.bme_humidity = bmedata.humidity;
   msg.time = micros();
 
-  Serial.print("msg.t1: ");
-  Serial.print(msg.t1);
-  Serial.print(" msg.h1: ");
-  Serial.print(msg.h1);
+  Serial.print("msg.temperature: ");
+  Serial.print(msg.temperature);
+  Serial.print(" msg.humidity: ");
+  Serial.print(msg.humidity);
+  Serial.print(" msg.brightness: ");
+  Serial.print(msg.brightness);
+  Serial.print(" msg.bme_temperature: ");
+  Serial.print(msg.bme_temperature);
+  Serial.print(" msg.bme_pressure: ");
+  Serial.print(msg.bme_pressure);
+  Serial.print(" msg.bme_altitude: ");
+  Serial.print(msg.bme_altitude);
+  Serial.print(" msg.bme_humidity: ");
+  Serial.print(msg.bme_humidity);
   Serial.println(" ... now sending");
   
   if (!radio.write( &msg, sizeof(msg) )){
@@ -102,4 +161,41 @@ float readHumidity() {
       float humidity = (1024 - reading) / 1024.0;
 
       return humidity;
+}
+
+float readBrightness() {
+  int reading = analogRead(BRIGHTPIN);
+  float brightness = (1024 - reading) / 1024.0;
+
+  return brightness;
+}
+
+BmeData readBmeData() {
+  BmeData bmedata;
+  bmedata.temperature = bme.readTemperature();
+  bmedata.pressure = bme.readPressure() / 100.0F;
+  bmedata.altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+  bmedata.humidity = bme.readHumidity();
+  return bmedata;
+}
+
+void printValues() {
+    Serial.print("Temperature = ");
+    Serial.print(bme.readTemperature());
+    Serial.println(" *C");
+
+    Serial.print("Pressure = ");
+
+    Serial.print(bme.readPressure() / 100.0F);
+    Serial.println(" hPa");
+
+    Serial.print("Approx. Altitude = ");
+    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.println(" m");
+
+    Serial.print("Humidity = ");
+    Serial.print(bme.readHumidity());
+    Serial.println(" %");
+
+    Serial.println();
 }
