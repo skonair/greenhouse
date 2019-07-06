@@ -39,7 +39,7 @@ const std::string currentDateTime() {
     return buf;
 }
 
-int main(int argc, char** argv) {
+void initRadio() {
   radio.begin();
   radio.setAutoAck(false);
   radio.setRetries(15,15);
@@ -51,22 +51,53 @@ int main(int argc, char** argv) {
   radio.startListening();
 
 //  radio.printDetails();
+}
 
-  while (1) {
+int readMessage(int retries, int delay, Message *msg) {
+  while (retries > 0) {
+    retries--;
     // if there is data ready
     if (radio.available()) {
-
-      Message msg;
-      while(radio.available()){
-        radio.read(&msg, sizeof(msg));
+      // Message msg;
+      while(radio.available()) {
+        radio.read(msg, sizeof(*msg));
       }
+     return 0;
+    } 
+    delay(delay);
+  }
+  return 1;
+}
 
+int readNextLine(char **line) {
+    Message msg;
+    int result = readMessage(3, 500, &msg);
+    if (result == 0) {
+      string sdate = currentDateTime();
+      sprintf(*line, "%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f", 
+          sdate.c_str(), msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
+    }
+    return result;
+}
+
+int main(int argc, char** argv) {
+  initRadio();
+
+  while (1) {
+    delay(500);
+    char *line = new char[256];
+    int result = readNextLine(&line);
+    if (result == 0) {
+       printf("%s\n", line);
+    }
+    /*
+    Message msg;
+    int result = readMessage(3, 500, &msg);
+    if (result == 0) {
       string sdate = currentDateTime();
       printf("%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f\n", 
           sdate.c_str(), msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
-
-      delay(500);
-    }
+     */
   }
 
   return 0;
