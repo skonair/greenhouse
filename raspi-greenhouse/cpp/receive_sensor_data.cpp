@@ -5,8 +5,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <RF24/RF24.h>
+#include "./includes/httplib.h"
+
 
 using namespace std;
+using namespace httplib;
 
 RF24 radio(RPI_V2_GPIO_P1_22, RPI_V2_GPIO_P1_24, BCM2835_SPI_SPEED_8MHZ);
 
@@ -73,9 +76,16 @@ int readNextLine(char **line) {
     Message msg;
     int result = readMessage(3, 500, &msg);
     if (result == 0) {
-      string sdate = currentDateTime();
-      sprintf(*line, "%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f", 
-          sdate.c_str(), msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
+      // sprintf(*line, "%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f", 
+
+      sprintf(*line, "# TYPE greenhouse_temperature gauge\ngreenhouse_temperature %.10e \n\
+# TYPE greenhouse_humidity gauge\ngreenhouse_humidity %.10e \n\
+# TYPE greenhouse_brightness gauge\ngreenhouse_brightness %.10e \n\
+# TYPE greenhouse_bme_temperature gauge\ngreenhouse_bme_temperature %.10e \n\
+# TYPE greenhouse_bme_pressure gauge\ngreenhouse_bme_pressure %.10e \n\
+# TYPE greenhouse_bme_altitude gauge\ngreenhouse_bme_altitude %.10e \n\
+# TYPE greenhouse_bme_humidity gauge\ngreenhouse_bme_humidity %.10e \n",
+          msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
     }
     return result;
 }
@@ -83,22 +93,18 @@ int readNextLine(char **line) {
 int main(int argc, char** argv) {
   initRadio();
 
-  while (1) {
-    delay(500);
-    char *line = new char[256];
+  Server svr;
+
+  svr.Get("/metrics", [](const Request & /* req */, Response &res) {
+    char *line = new char[4096];
     int result = readNextLine(&line);
+    printf("Result is %d and line is %s\n", result, line);
     if (result == 0) {
-       printf("%s\n", line);
+      res.set_content(line, "text/plain");
     }
-    /*
-    Message msg;
-    int result = readMessage(3, 500, &msg);
-    if (result == 0) {
-      string sdate = currentDateTime();
-      printf("%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f\n", 
-          sdate.c_str(), msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
-     */
-  }
+  });
+
+  svr.listen("localhost", 9999);
 
   return 0;
 }

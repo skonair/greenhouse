@@ -17,8 +17,10 @@ SOURCES = ${PROGRAMS:=.cpp}
 
 all: ${PROGRAMS}
 
+# -o benchmark -std=c++14 -I.. -Wall -Wextra -lpthread benchmark.cc -DCPPHTTPLIB_OPENSSL_SUPPORT -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -lssl -lcrypto -DCPPHTTPLIB_ZLIB_SUPPORT -lz
+
 ${PROGRAMS}: ${SOURCES}
-	g++ ${CCFLAGS} -Wall -lrf24-bcm $@.cpp -o $@
+	g++ -std=c++14 ${CCFLAGS} -Wall -lpthread -lrf24-bcm $@.cpp -o $@
 
 clean:
 	rm -rf $(PROGRAMS)
