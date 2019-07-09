@@ -69,6 +69,8 @@ struct message {
 };
 typedef struct message Message;
 
+Message msg;
+
 void setup() {
   Serial.begin(9600);
   delay(500);
@@ -93,49 +95,67 @@ void setup() {
   radio.setPALevel(RF24_PA_LOW);  // default is RF24_PA_MAX
   radio.openWritingPipe(addresses[0]);
   radio.openReadingPipe(1,addresses[1]);
-  radio.setAutoAck(false);
-
+  radio.setAutoAck(true);
   radio.printDetails();
+  
+  radio.startListening();
 }
 
-void loop() {
+void readSensors(Message *msg) {
   float temperature = readTemperature();
   float humidity = readHumidity();
   float brightness = readBrightness();
-
   BmeData bmedata = readBmeData();
 
-  Message msg;
-  msg.temperature = temperature;
-  msg.humidity = humidity;
-  msg.brightness = brightness;
-  msg.bme_temperature = bmedata.temperature;
-  msg.bme_pressure = bmedata.pressure;
-  msg.bme_altitude = bmedata.altitude;
-  msg.bme_humidity = bmedata.humidity;
-  msg.time = micros();
+  msg->temperature = temperature;
+  msg->humidity = humidity;
+  msg->brightness = brightness;
+  msg->bme_temperature = bmedata.temperature;
+  msg->bme_pressure = bmedata.pressure;
+  msg->bme_altitude = bmedata.altitude;
+  msg->bme_humidity = bmedata.humidity;
+  msg->time = micros();
+}
 
+void printMessage(Message *msg) {
   Serial.print("msg.temperature: ");
-  Serial.print(msg.temperature);
+  Serial.print(msg->temperature);
   Serial.print(" msg.humidity: ");
-  Serial.print(msg.humidity);
+  Serial.print(msg->humidity);
   Serial.print(" msg.brightness: ");
-  Serial.print(msg.brightness);
+  Serial.print(msg->brightness);
   Serial.print(" msg.bme_temperature: ");
-  Serial.print(msg.bme_temperature);
+  Serial.print(msg->bme_temperature);
   Serial.print(" msg.bme_pressure: ");
-  Serial.print(msg.bme_pressure);
+  Serial.print(msg->bme_pressure);
   Serial.print(" msg.bme_altitude: ");
-  Serial.print(msg.bme_altitude);
+  Serial.print(msg->bme_altitude);
   Serial.print(" msg.bme_humidity: ");
-  Serial.print(msg.bme_humidity);
+  Serial.print(msg->bme_humidity);
   Serial.println(" ... now sending");
-  
-  if (!radio.write( &msg, sizeof(msg) )){
-    Serial.println("Sending failed");
+}
+
+
+void loop() {
+
+  int i = 1;
+  if (radio.available()) {
+    radio.read(i, sizeof(&i));
+    Serial.print("read: "); Serial.println(i);
+
+    readSensors(&msg);
+    printMessage(&msg);
+
+    radio.stopListening();
+    if (!radio.write( &msg, sizeof(msg) )){
+      Serial.println("Sending failed");
+    }
+    radio.startListening();
+
+   
   }
 
-  delay(1000);
+  delay(500);
 }
 
 float readTemperature() {
