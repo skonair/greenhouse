@@ -14,6 +14,7 @@ using namespace httplib;
 RF24 radio(RPI_V2_GPIO_P1_22, RPI_V2_GPIO_P1_24, BCM2835_SPI_SPEED_8MHZ);
 
 const uint8_t addresses[][6] = {"1Node","2Node"};
+const int i42 = 0x42;
 
 struct message {
   float temperature;
@@ -44,7 +45,7 @@ const std::string currentDateTime() {
 
 void initRadio() {
   radio.begin();
-  radio.setAutoAck(false);
+  radio.setAutoAck(true);
   radio.setRetries(15,15);
   radio.setPALevel(RF24_PA_HIGH); // default is RF24_PA_MAX
 
@@ -53,10 +54,15 @@ void initRadio() {
 
   radio.startListening();
 
-//  radio.printDetails();
+  radio.printDetails();
 }
 
 int readMessage(int retries, int delay, Message *msg) {
+  // send a ping request to the arduino
+  radio.stopListening();
+  radio.write(&i42,sizeof(i42));
+
+  radio.startListening();
   while (retries > 0) {
     retries--;
     // if there is data ready
