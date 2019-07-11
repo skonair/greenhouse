@@ -80,17 +80,17 @@ int readMessage(int retries, int delay, Message *msg) {
 
 int readNextLine(char **line) {
     Message msg;
-    int result = readMessage(3, 500, &msg);
+    int result = readMessage(4, 250, &msg);
     if (result == 0) {
       // sprintf(*line, "%s temperature %.2f humidity %.2f brightness %.2f bmetemperature %.2f bmepressure %.2f bmealtitude %.2f bmehumidity %.2f", 
 
       sprintf(*line, "# TYPE greenhouse_temperature gauge\ngreenhouse_temperature %.10e \n\
-# TYPE greenhouse_humidity gauge\ngreenhouse_humidity %.10e \n\
-# TYPE greenhouse_brightness gauge\ngreenhouse_brightness %.10e \n\
-# TYPE greenhouse_bme_temperature gauge\ngreenhouse_bme_temperature %.10e \n\
-# TYPE greenhouse_bme_pressure gauge\ngreenhouse_bme_pressure %.10e \n\
-# TYPE greenhouse_bme_altitude gauge\ngreenhouse_bme_altitude %.10e \n\
-# TYPE greenhouse_bme_humidity gauge\ngreenhouse_bme_humidity %.10e \n",
+# TYPE greenhouse_humidity gauge\ngreenhouse_humidity %.10e\n\
+# TYPE greenhouse_brightness gauge\ngreenhouse_brightness %.10e\n\
+# TYPE greenhouse_bme_temperature gauge\ngreenhouse_bme_temperature %.10e\n\
+# TYPE greenhouse_bme_pressure gauge\ngreenhouse_bme_pressure %.10e\n\
+# TYPE greenhouse_bme_altitude gauge\ngreenhouse_bme_altitude %.10e\n\
+# TYPE greenhouse_bme_humidity gauge\ngreenhouse_bme_humidity %.10e\n",
           msg.temperature, msg.humidity, msg.brightness, msg.bme_temperature, msg.bme_pressure, msg.bme_altitude, msg.bme_humidity);
     }
     return result;
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     }
   });
 
-  svr.listen("localhost", 9999);
+  svr.listen("0.0.0.0", 9999);
 
   return 0;
 }
